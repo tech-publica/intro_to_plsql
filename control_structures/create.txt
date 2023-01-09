@@ -1,0 +1,58 @@
+If you are working in a multi-tenant database use these commands
+---------------------------------------------------------------------------
+--As a system user in a PDB database or you can create the operations user using the following commands
+  CREATE USER operations IDENTIFIED BY operations DEFAULT TABLESPACE users;
+  GRANT CONNECT, RESOURCE TO operations;
+  GRANT CREATE ANY TRIGGER TO operations;
+  ALTER USER demo QUOTA UNLIMITED ON operations;
+
+
+If you are working in an Autonomous database use these commands
+----------------------------------------------------------------------------
+--As admin user 
+   --Create users
+  CREATE USER operations IDENTIFIED BY operations DEFAULT TABLESPACE data;
+  GRANT CONNECT, RESOURCE TO operations;
+  GRANT CREATE ANY TRIGGER TO operations;
+
+
+Common commands for both kind of databases:
+-----------------------------------------------------------------------------
+
+
+--As user operations 
+
+  CREATE TABLE ITEMS  (item_id               NUMBER  NOT NULL PRIMARY KEY,
+                       item_name             VARCHAR2(60) NOT NULL,
+                       item_value            NUMBER(6,2) NOT NULL,
+                       item_category         VARCHAR2(60),
+                       item_insert_datetime  TIMESTAMP,
+                       item_insert_user      VARCHAR2(60)  );
+
+
+  CREATE SEQUENCE items_seq START WITH 1 INCREMENT BY 1;
+
+
+  CREATE OR REPLACE TRIGGER ITEMS_INS_TRIGGER 
+    BEFORE INSERT ON items 
+    FOR EACH ROW 
+  BEGIN  
+    IF INSERTING THEN 
+      SELECT items_SEQ.nextval INTO :NEW."ITEM_ID" FROM dual;
+      :NEW.ITEM_INSERT_DATETIME := SYSDATE;
+      :NEW.ITEM_INSERT_USER := USER;
+    END IF; 
+  END;
+  /
+-- INSERT INTO items table
+  INSERT INTO items(item_name,item_value,item_category) VALUES ('Treadmill', 800, 'Fitness');
+  INSERT INTO items(item_name,item_value,item_category) VALUES ('Elliptical',1500, 'Fitness');
+  INSERT INTO items(item_name,item_value,item_category) VALUES ('Scooter',600, 'Fitness');
+  INSERT INTO items(item_name,item_value,item_category) VALUES ('Weights',120, 'Fitness');
+  INSERT INTO items(item_name,item_value,item_category) VALUES ('Bed',800, 'Furniture');
+  INSERT INTO items(item_name,item_value,item_category) VALUES ('Table',100, 'Furniture');
+  INSERT INTO items(item_name,item_value,item_category) VALUES ('Chair',50, 'Furniture');
+  INSERT INTO items(item_name,item_value,item_category) VALUES ('Closet',600, 'Furniture');
+  INSERT INTO items(item_name,item_value,item_category) VALUES ('Cabinet',200, 'Furniture');
+  INSERT INTO items(item_name,item_value,item_category) VALUES ('Dining Table',400, 'Furniture');
+  COMMIT;

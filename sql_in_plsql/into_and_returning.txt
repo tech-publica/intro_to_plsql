@@ -1,0 +1,55 @@
+
+--This example uses a SELECT INTO statement to assign to the variable bonus the value that is 10% of the salary of the employee whose employee_id is 100.
+
+DECLARE
+  bonus   NUMBER(8,2);
+BEGIN
+  SELECT salary * 0.10 INTO bonus
+  FROM employees
+  WHERE employee_id = 100;
+END;
+
+DBMS_OUTPUT.PUT_LINE('bonus = ' || TO_CHAR(bonus));
+/
+
+--Result:
+bonus = 2400
+
+
+--//// 
+
+--Returning Deleted Rows in Two Nested Tables
+
+DROP TABLE emp_temp;
+CREATE TABLE emp_temp AS
+SELECT * FROM employees
+ORDER BY employee_id;
+
+DECLARE
+  TYPE NumList IS TABLE OF employees.employee_id%TYPE;
+  enums  NumList;
+  TYPE NameList IS TABLE OF employees.last_name%TYPE;
+  names  NameList;
+BEGIN
+  DELETE FROM emp_temp
+  WHERE department_id = 30
+  RETURNING employee_id, last_name
+  BULK COLLECT INTO enums, names;
+
+  DBMS_OUTPUT.PUT_LINE ('Deleted ' || SQL%ROWCOUNT || ' rows:');
+  FOR i IN enums.FIRST .. enums.LAST
+  LOOP
+    DBMS_OUTPUT.PUT_LINE ('Employee #' || enums(i) || ': ' || names(i));
+  END LOOP;
+END;
+/
+
+Result:
+Deleted 6 rows:
+Employee #114: Raphaely
+Employee #115: Khoo
+Employee #116: Baida
+Employee #117: Tobias
+Employee #118: Himuro
+Employee #119: Colmenares
+
