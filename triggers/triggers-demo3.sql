@@ -1,0 +1,10 @@
+select * from items;
+update items set item_value = item_value * 1.10 where item_id in (1,2);
+alter trigger ITEMS_BS_UPD_TRIG disable;
+update items set item_value = item_value * 1.10 where item_id in (1,2);
+alter trigger ITEMS_BS_UPD_TRIG enable;
+update items set item_value = item_value * 1.10 where item_id in (1,2);
+alter table items disable all triggers;
+update items set item_value = item_value * 1.10 where item_id in (1,2);
+alter table items enable all triggers;
+update items set item_value = item_value * 1.10 where item_id in (1,2);
